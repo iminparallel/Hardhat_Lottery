@@ -47,7 +47,7 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
     waitConfirmations: network.config.blockConfirmations || 1,
   })
   console.log(`...........`, lottery.address)
-  if (chainId == 31337) {
+  /*if (chainId == 31337) {
     try {
       await vrfCoordinatorV2Mock.addConsumer(
         Number(subscriptionId),
@@ -57,7 +57,7 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
     } catch (error) {
       console.log(error.toString())
     }
-  }
+  }*/
   if (
     !developmentChains.includes(network.name) &&
     process.env.ETHERSCAN_API_KEY
