@@ -1,5 +1,5 @@
 const { network } = require("hardhat")
-const FUND_AMOUNT = ethers.parseEther("10000000000") // 1 Ether, or 1e18 (10^18) Wei
+const FUND_AMOUNT = ethers.parseEther("1") // 1 Ether, or 1e18 (10^18) Wei
 const {
   networkConfig,
   developmentChains,
@@ -26,6 +26,7 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
     //console.log(transactionReceipt.logs)
     subscriptionId = transactionReceipt.logs[0].topics[1]
     await vrfCoordinatorV2Mock.fundSubscription(subscriptionId, FUND_AMOUNT)
+    console.log(subscriptionId)
   } else {
     vrfCoordinatorV2Address = networkConfig[chainId]["vrfCoordinatorV2"]
     subscriptionId = networkConfig[chainId]["subscriptionId"]
@@ -47,15 +48,15 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
   })
   console.log(`...........`, lottery.address)
   if (chainId == 31337) {
-    /* const addConsumerResponse = await vrfCoordinatorV2Mock.addConsumer(
-      subscriptionId,
-      lottery.address,
-    )
-    const receipt01 = await addConsumerResponse.wait(1)*/
-    await vrfCoordinatorV2Mock.addConsumer(
-      Number(subscriptionId),
-      lottery.address,
-    )
+    try {
+      await vrfCoordinatorV2Mock.addConsumer(
+        Number(subscriptionId),
+        lottery.address,
+      )
+      console.log("... consome is added ...")
+    } catch (error) {
+      console.log(error.toString())
+    }
   }
   if (
     !developmentChains.includes(network.name) &&

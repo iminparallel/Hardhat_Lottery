@@ -1,17 +1,18 @@
 // SPDX--Licence-Identifier: MIT
 import "@chainlink/contracts/src/v0.8/vrf/VRFConsumerBaseV2.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
-import "@chainlink/contracts/src/v0.8/automation/interfaces/AutomationCompatibleInterface.sol"; /*KeeperCompatibleInterface - can be used aswell*/
+import "@chainlink/contracts/src/v0.8/automation/interfaces/KeeperCompatibleInterface.sol"; /*KeeperCompatibleInterface AutomationCompatibleInterface- can be used aswell*/
 import "hardhat/console.sol";
+import {LinkTokenInterface} from "@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol";
 
 pragma solidity ^0.8.24;
 error Lottery_NotEnoughETHEntered();
 error Raffle__TransferFailed();
 error Raffle__RaffleNotOpen();
 error Raffle__UpkeepNotNeeded(uint256 currentBalance, uint256 numPlayers, uint256 raffleState);
-error Raffele_InvalidConsumer();
+//error Raffele_InvalidConsumer();
 
-contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
+contract Lottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
 
     enum RaffleState {
         OPEN,
@@ -19,6 +20,8 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
     }
 
     VRFCoordinatorV2Interface private immutable i_vrfCoordinator;
+    LinkTokenInterface private immutable i_linktoken;
+
     uint64 private immutable i_subscriptionId;
     bytes32 private immutable i_gasLane;
     uint32 private immutable i_callbackGasLimit;
@@ -31,6 +34,8 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
     RaffleState private s_raffleState;
     uint256 private s_lastTimeStamp;
     address payable[] private s_players;
+    address link_token_contract = 0x779877A7B0D9E8603169DdbD7836e478b4624789;
+
    /* address [] private s_consumers;*/
 
 
@@ -46,14 +51,15 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
         uint32 callbackGasLimit) VRFConsumerBaseV2(vrfCoordinatorV2) {
         i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
         i_entrancefee = entranceFee/10**70; 
-        i_subscriptionId = subscriptionId;
+        i_subscriptionId = i_vrfCoordinator.createSubscription();
         i_gasLane = gasLane;
         i_interval = interval;
         i_callbackGasLimit = callbackGasLimit;
         s_raffleState = RaffleState.OPEN;
         s_lastTimeStamp = block.timestamp;
+        i_linktoken = LinkTokenInterface(link_token_contract);
+        i_vrfCoordinator.addConsumer(i_subscriptionId, address(this));
         }
-
 
     function enterRaffle() public payable{
         if(msg.value < i_entrancefee){

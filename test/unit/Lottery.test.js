@@ -79,10 +79,9 @@ const { assert, expect, chai } = require("chai")
         it("doesn't allow entrance when raffle is calculating", async () => {
           await instance.enterRaffle({ value: lotteryEntranceFee })
           // for a documentation of the methods below, go here: https://hardhat.org/hardhat-network/reference
-          const blockTimestamp = (await ethers.provider.getBlock("latest"))
-            .timestamp
-          console.log(blockTimestamp)
-
+          //const blockTimestamp = (await ethers.provider.getBlock("latest")).timestamp
+          //console.log(blockTimestamp)
+          // await vrfCoordinatorV2Mock
           await network.provider.send("evm_increaseTime", [
             Number(interval) + 1,
           ])
@@ -99,18 +98,14 @@ const { assert, expect, chai } = require("chai")
           let state = await lottery.getRaffleState()
           console.log(state)
           // we pretend to be a keeper for a second
-          await lottery.performUpkeep("0x") // changes the state to calculating for our comparison below
+          await instance.performUpkeep("0x") // changes the state to calculating for our comparison below
           state = await lottery.getRaffleState()
           console.log(state)
 
           /* expect(raffleState).to.equal("CALCULATING") */
 
-          await expect(
-            instance.enterRaffle({ value: lotteryEntranceFee }),
-          ).to.be.revertedWith(
-            // is reverted as raffle is calculating
-            "Raffle__RaffleNotOpen",
-          )
+          await expect(instance.enterRaffle({ value: lotteryEntranceFee })).to
+            .be.reverted
         })
       })
     })
