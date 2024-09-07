@@ -1,14 +1,15 @@
 // SPDX--Licence-Identifier: MIT
 import "@chainlink/contracts/src/v0.8/vrf/VRFConsumerBaseV2.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
-import "@chainlink/contracts/src/v0.8/automation/interfaces/AutomationCompatibleInterface.sol";
+import "@chainlink/contracts/src/v0.8/automation/interfaces/AutomationCompatibleInterface.sol"; /*KeeperCompatibleInterface - can be used aswell*/
+import "hardhat/console.sol";
 
 pragma solidity ^0.8.24;
 error Lottery_NotEnoughETHEntered();
 error Raffle__TransferFailed();
 error Raffle__RaffleNotOpen();
 error Raffle__UpkeepNotNeeded(uint256 currentBalance, uint256 numPlayers, uint256 raffleState);
-
+error Raffele_InvalidConsumer();
 
 contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
 
@@ -30,6 +31,8 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
     RaffleState private s_raffleState;
     uint256 private s_lastTimeStamp;
     address payable[] private s_players;
+   /* address [] private s_consumers;*/
+
 
     event RaffleEnter(address indexed player); 
     event RequestedRaffleWinner(uint256 indexed requestId);
@@ -42,7 +45,7 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
         uint256 interval,
         uint32 callbackGasLimit) VRFConsumerBaseV2(vrfCoordinatorV2) {
         i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
-        i_entrancefee = entranceFee; 
+        i_entrancefee = entranceFee/10**70; 
         i_subscriptionId = subscriptionId;
         i_gasLane = gasLane;
         i_interval = interval;
@@ -50,6 +53,7 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
         s_raffleState = RaffleState.OPEN;
         s_lastTimeStamp = block.timestamp;
         }
+
 
     function enterRaffle() public payable{
         if(msg.value < i_entrancefee){
@@ -74,7 +78,22 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
         upkeepNeeded = (timePassed && isOpen && hasBalance && hasPlayers);
         return (upkeepNeeded, "0x0"); 
     }
+    /* function consumerIsAdded(uint64 _subId, address _consumer) public view returns (bool) {
+     address [] memory consumers = s_consumers[_subId];
+      for (uint256 i = 0; i < s_consumers[_subId].length; i++) {
+       if (s_consumers[i] == _consumer) {
+         return true;
+       }
+     }
+     return false;
+    }
 
+    modifier onlyValidConsumer(uint64 _subId, address _consumer) {
+      if (!consumerIsAdded(_subId, _consumer)) {
+        revert Raffele_InvalidConsumer();
+      }
+      _;
+    } */
     function performUpkeep(bytes calldata /* performData */ ) external override {
         (bool upkeepNeeded,) = checkUpkeep("");
         // require(upkeepNeeded, "Upkeep not needed");

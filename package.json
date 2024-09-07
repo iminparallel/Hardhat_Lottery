@@ -2,7 +2,7 @@
   "name": "lottery",
   "version": "1.0.0",
   "license": "MIT",
-  "type": "module",
+  "type": "commonjs",
   "devDependencies": {
     "@chainlink/contracts": "0.8",
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
@@ -25,6 +25,7 @@
     "hardhat": "^2.22.9",
     "hardhat-contract-sizer": "^2.10.0",
     "hardhat-deploy": "^0.12.4",
+    "hardhat-ethers": "^1.0.1",
     "hardhat-gas-reporter": "^2.2.1",
     "prettier": "^3.3.3",
     "prettier-plugin-solidity": "^1.4.1",
