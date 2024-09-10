@@ -1,7 +1,7 @@
 // SPDX--Licence-Identifier: MIT
 import "@chainlink/contracts/src/v0.8/vrf/VRFConsumerBaseV2.sol";
-import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
-import "@chainlink/contracts/src/v0.8/automation/interfaces/KeeperCompatibleInterface.sol"; /*KeeperCompatibleInterface AutomationCompatibleInterface- can be used aswell*/
+import {VRFCoordinatorV2Interface} from "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
+import {AutomationCompatibleInterface} from "@chainlink/contracts/src/v0.8/automation/interfaces/AutomationCompatibleInterface.sol"; /*KeeperCompatibleInterface AutomationCompatibleInterface- can be used aswell*/
 import "hardhat/console.sol";
 import {LinkTokenInterface} from "@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol";
 
@@ -12,7 +12,7 @@ error Raffle__RaffleNotOpen();
 error Raffle__UpkeepNotNeeded(uint256 currentBalance, uint256 numPlayers, uint256 raffleState);
 //error Raffele_InvalidConsumer();
 
-contract Lottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
+contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
 
     enum RaffleState {
         OPEN,
@@ -44,6 +44,7 @@ contract Lottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
     event WinnerPicked(address payable winner); 
 
     constructor(address vrfCoordinatorV2,
+    //address linkToken,
         uint64 subscriptionId,
         bytes32 gasLane, // keyHash
         uint256 entranceFee,
@@ -57,8 +58,13 @@ contract Lottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
         i_callbackGasLimit = callbackGasLimit;
         s_raffleState = RaffleState.OPEN;
         s_lastTimeStamp = block.timestamp;
-        i_linktoken = LinkTokenInterface(link_token_contract);
+       // i_linktoken = LinkTokenInterface(link_token_contract);
         i_vrfCoordinator.addConsumer(i_subscriptionId, address(this));
+       /* i_linktoken.transferAndCall(
+            address(i_vrfCoordinator),
+            100000000,
+            abi.encode(i_subscriptionId));   */ 
+       // i_vrfCoordinator.fundSubscription(i_subscriptionId, 100000000000000000000);
         }
 
     function enterRaffle() public payable{
@@ -158,5 +164,8 @@ contract Lottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
     }   
     function getNumberOfPlayers() public view returns (uint256) {
         return s_players.length;
+    }  
+    function getSubscriptionId() public view returns (uint256) {
+        return i_subscriptionId;
     }     
 }

@@ -25,6 +25,12 @@ module.exports = {
         version: "0.4.24",
       },
       {
+        version: "0.4.11",
+      },
+      {
+        version: "0.6.0",
+      },
+      {
         version: "0.8.0",
       },
     ],
@@ -39,7 +45,7 @@ module.exports = {
     },
   },
   networks: {
-    hardhat: { gas: "auto", gasLimit: 21064 },
+    hardhat: { gas: "auto", gasLimit: 21064, allowUnlimitedContractSize: true },
     sepolia: {
       url: SEPOLIA_RPC_URL,
       accounts: [PRIVATE_KEY],
@@ -51,6 +57,7 @@ module.exports = {
       chainId: 31337,
       gas: "auto",
       gasLimit: 21064,
+      allowUnlimitedContractSize: true,
     },
   },
   gasReporter: {
@@ -61,6 +68,6 @@ module.exports = {
     //coinmarketcap: COINMARKETCAP_API_KEY,
   },
   mocha: {
-    timeout: 500000,
+    timeout: 100000,
   },
 }
